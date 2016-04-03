@@ -1,7 +1,8 @@
 # locale-currency
 A map of i18n country codes to ISO 4217 currency codes.
 
-API:
+Examples
+
     var LocaleCurrency = require('./');
     var assert = require('assert');
     assert(LocaleCurrency.getCurrency("us") === "USD");
@@ -12,10 +13,10 @@ API:
     assert(LocaleCurrency.getCurrency("en_us") === "USD");
     assert(LocaleCurrency.getCurrency("EN-US") === "USD");
     assert(LocaleCurrency.getCurrency("en-us") === "USD");
-
     assert(LocaleCurrency.getCurrency("GB") === "GBP");
     assert(LocaleCurrency.getCurrency("ES") === "EUR");
     assert(LocaleCurrency.getCurrency("GR") === "EUR");
+
 
     var euroCountries = LocaleCurrency.getLocales("EUR");
     assert(euroCountries.indexOf("GR") > -1); // Germany
