@@ -3,7 +3,7 @@ A map of i18n country codes to ISO 4217 currency codes.
 
 Examples
 
-    var LocaleCurrency = require('./');
+    var LocaleCurrency = require('locale-currency');
     var assert = require('assert');
     assert(LocaleCurrency.getCurrency("us") === "USD");
     assert(LocaleCurrency.getCurrency("US") === "USD");
