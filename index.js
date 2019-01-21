@@ -23,7 +23,7 @@ exports.getCurrency = function(locale) {
 exports.getLocales = function(currencyCode) {
     currencyCode = currencyCode.toUpperCase();
     var locales = [];
-    for (countryCode in map) {
+    for (var countryCode in map) {
         if (map[countryCode] === currencyCode) {
             locales.push(countryCode);
         }
