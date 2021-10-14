@@ -246,7 +246,7 @@ WS: 'WST',
 YE: 'YER',
 YT: 'EUR',
 ZA: 'ZAR',
-ZM: 'ZMK',
+ZM: 'ZMW',
 ZW: 'ZWL'
 };
 
