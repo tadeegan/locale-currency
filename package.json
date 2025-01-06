@@ -1,6 +1,6 @@
 {
   "name": "locale-currency",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "A map of i18n country codes to ISO 4217 currency codes.  Originally generated from the output of java.util.Currency.getInstance(locale)",
   "main": "index.js",
   "types": "./index.d.ts",
