@@ -8,12 +8,14 @@
   "exports": {
     ".": {
       "import": "./index.js",
+      "require": "./index.js",
       "types": "./index.d.ts"
     }
   },
   "scripts": {
-    "test": "node test.js && npm run test:types",
-    "test:types": "tsc --noEmit"
+    "test": "node test.js && npm run test:types && npm run test:cjs",
+    "test:types": "tsc --noEmit",
+    "test:cjs": "node test-cjs.cjs"
   },
   "keywords": [
     "locale",
