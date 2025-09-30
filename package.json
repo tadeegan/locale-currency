@@ -12,7 +12,8 @@
     }
   },
   "scripts": {
-    "test": "node test.js"
+    "test": "node test.js && npm run test:types",
+    "test:types": "tsc --noEmit"
   },
   "keywords": [
     "locale",
@@ -40,5 +41,9 @@
     "index.js",
     "index.d.ts",
     "map.js"
-  ]
+  ],
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "typescript": "^5.9.2"
+  }
 }
