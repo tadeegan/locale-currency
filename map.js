@@ -1,5 +1,5 @@
 // Generated using ShowCurrencies.java
-var map = {
+const map = {
 AD: 'EUR',
 AE: 'AED',
 AF: 'AFN',
@@ -251,4 +251,4 @@ ZM: 'ZMW',
 ZW: 'ZWG',
 };
 
-module.exports = map;
+export default map;
