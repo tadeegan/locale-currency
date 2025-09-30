@@ -1,21 +1,44 @@
 {
   "name": "locale-currency",
-  "version": "0.0.4",
-  "description": "A map of i18n country codes to ISO 4217 currency codes.  Originally generated from the output of java.util.Currency.getInstance(locale)",
+  "version": "1.0.0",
+  "description": "A map of locale codes to ISO 4217 currency codes. Supports BCP 47, i18n, and ISO 3166-1 alpha-2 formats.",
+  "type": "module",
   "main": "index.js",
   "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "types": "./index.d.ts"
+    }
+  },
   "scripts": {
     "test": "node test.js"
   },
+  "keywords": [
+    "locale",
+    "currency",
+    "i18n",
+    "internationalization",
+    "BCP 47",
+    "ISO 4217",
+    "ISO 3166-1",
+    "country code"
+  ],
   "author": {
-    "name" : "Thomas Deegan",
-    "email" : "tadeegan@gmail.com"
+    "name": "Thomas Deegan",
+    "email": "tadeegan@gmail.com"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/tadeegan/locale-currency.git"
   },
   "license": "BSD-2-Clause",
-  "dependencies": {
-  }
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "map.js"
+  ]
 }
