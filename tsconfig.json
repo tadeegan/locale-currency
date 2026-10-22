@@ -9,5 +9,5 @@
     "noEmit": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["test-types.ts", "index.d.ts"]
+  "include": ["test-types.ts", "index.d.ts", "currency-decimals.d.ts"]
 }

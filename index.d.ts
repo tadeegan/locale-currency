@@ -12,3 +12,10 @@ export function getCurrency(locale: string): string | null;
  * @returns Array of ISO 3166-1 alpha-2 country codes
  */
 export function getLocales(currencyCode: string): string[];
+
+export {
+    type CurrencyDecimalMap,
+    currencyDecimalMap,
+    getExponentForCurrency,
+    convertToSmallestCurrencyUnit,
+} from "./currency-decimals.js";

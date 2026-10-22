@@ -57,3 +57,9 @@ export const getLocales = (currencyCode) => {
     }
     return locales;
 };
+
+export {
+    currencyDecimalMap,
+    getExponentForCurrency,
+    convertToSmallestCurrencyUnit,
+} from "./currency-decimals.js";

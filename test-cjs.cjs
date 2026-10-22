@@ -1,7 +1,7 @@
 // CommonJS dynamic import test
 // Tests that ES modules can be imported from CommonJS contexts using dynamic import()
 (async () => {
-    const { getCurrency, getLocales } = await import('./index.js');
+    const { getCurrency, getLocales, getExponentForCurrency, convertToSmallestCurrencyUnit } = await import('./index.js');
 
     // Test getCurrency
     const usdCurrency = getCurrency('en-US');
@@ -19,6 +19,20 @@
     const twdCurrency = getCurrency('zh-Hant-TW');
     if (twdCurrency !== 'TWD') {
         throw new Error(`Expected TWD, got ${twdCurrency}`);
+    }
+
+    // Test currency decimals
+    if (getExponentForCurrency('JPY') !== 0) {
+        throw new Error(`Expected 0, got ${getExponentForCurrency('JPY')}`);
+    }
+    if (convertToSmallestCurrencyUnit(10.99, 'USD') !== 1099) {
+        throw new Error(`Expected 1099, got ${convertToSmallestCurrencyUnit(10.99, 'USD')}`);
+    }
+
+    // Test subpath import
+    const decimals = await import('./currency-decimals.js');
+    if (decimals.getExponentForCurrency('KWD') !== 3) {
+        throw new Error(`Expected 3, got ${decimals.getExponentForCurrency('KWD')}`);
     }
 
     console.log('✓ CommonJS dynamic import test passed');
