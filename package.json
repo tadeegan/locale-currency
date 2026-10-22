@@ -1,6 +1,6 @@
 {
   "name": "locale-currency",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A map of locale codes to ISO 4217 currency codes. Supports BCP 47, i18n, and ISO 3166-1 alpha-2 formats.",
   "type": "module",
   "main": "index.js",
