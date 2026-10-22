@@ -6,6 +6,8 @@ import {
     convertToSmallestCurrencyUnit,
 } from './index.js';
 import * as decimals from './currency-decimals.js';
+import * as pkg from 'locale-currency';
+import * as decimalsSubpath from 'locale-currency/decimals';
 import map from './map.js';
 import assert from 'assert';
 
@@ -41,6 +43,33 @@ const euroCountries = getLocales("EUR");
 assert(euroCountries.indexOf("GR") > -1); // Greece
 assert(euroCountries.indexOf("FR") > -1); // France
 assert(euroCountries.indexOf("ES") > -1); // Spain
+
+// Test getLocales edge cases
+assert.deepStrictEqual(getLocales("usd"), getLocales("USD")); // case insensitive
+assert.deepStrictEqual(getLocales("ZZZ"), []); // unknown currency
+assert.deepStrictEqual(getLocales(""), []);
+assert.deepStrictEqual(getLocales("GBP").sort(), ["GB", "GG", "GS", "IM", "JE"]);
+assert.deepStrictEqual(getLocales("JPY"), ["JP"]);
+assert(getLocales("USD") !== getLocales("USD")); // fresh array each call
+// Every country round-trips through getCurrency and getLocales
+for (const [country, currency] of Object.entries(map)) {
+    assert(getLocales(currency).includes(country), `${country} missing from getLocales(${currency})`);
+}
+
+// Every map entry is a valid ISO 3166-1 alpha-2 / ISO 4217 code pair
+for (const [country, currency] of Object.entries(map)) {
+    assert(/^[A-Z]{2}$/.test(country), `bad country code ${country}`);
+    assert(/^[A-Z]{3}$/.test(currency), `bad currency code ${currency} for ${country}`);
+}
+// Check against the runtime's ISO 4217 list where available (Node 18+). ICU
+// lags ISO 4217, so codes newer than the runtime's ICU data are allowed.
+if (typeof Intl.supportedValuesOf === "function") {
+    const iso4217 = new Set(Intl.supportedValuesOf("currency"));
+    const newerThanIcu = new Set(["SLE", "VED", "XCG", "ZWG"]);
+    for (const [country, currency] of Object.entries(map)) {
+        assert(iso4217.has(currency) || newerThanIcu.has(currency), `unknown ISO 4217 code ${currency} for ${country}`);
+    }
+}
 
 // Test null for invalid codes
 assert(getCurrency("XX") === null);
@@ -78,5 +107,24 @@ assert(convertToSmallestCurrencyUnit(-4.5, "EUR") === -450);
 assert(decimals.getExponentForCurrency === getExponentForCurrency);
 assert(decimals.convertToSmallestCurrencyUnit === convertToSmallestCurrencyUnit);
 assert(decimals.currencyDecimalMap === currencyDecimalMap);
+
+// Package exports resolve to the same modules
+assert(pkg.getCurrency === getCurrency);
+assert(pkg.getExponentForCurrency === getExponentForCurrency);
+assert(decimalsSubpath.getExponentForCurrency === getExponentForCurrency);
+assert(decimalsSubpath.convertToSmallestCurrencyUnit === convertToSmallestCurrencyUnit);
+assert(decimalsSubpath.currencyDecimalMap === currencyDecimalMap);
+assert.deepStrictEqual(Object.keys(decimalsSubpath).sort(), [
+    "convertToSmallestCurrencyUnit",
+    "currencyDecimalMap",
+    "getExponentForCurrency",
+]); // subpath does not expose the locale functions
+
+// Decimals subpath edge cases
+assert(getExponentForCurrency("") === 2);
+assert(convertToSmallestCurrencyUnit(0, "USD") === 0);
+assert(convertToSmallestCurrencyUnit(19.99, "zzz") === 1999); // unknown uses 2 decimals
+assert(convertToSmallestCurrencyUnit(1.5, "jpy") === 2); // rounds for zero-decimal currencies
+assert(Number.isInteger(convertToSmallestCurrencyUnit(123.456789, "BHD")));
 
 console.log("PASSED");

@@ -35,5 +35,15 @@
         throw new Error(`Expected 3, got ${decimals.getExponentForCurrency('KWD')}`);
     }
 
+    // Test package exports by name
+    const pkg = await import('locale-currency');
+    if (pkg.getCurrency !== getCurrency) {
+        throw new Error('Expected locale-currency to resolve to index.js');
+    }
+    const pkgDecimals = await import('locale-currency/decimals');
+    if (pkgDecimals.getExponentForCurrency !== decimals.getExponentForCurrency) {
+        throw new Error('Expected locale-currency/decimals to resolve to currency-decimals.js');
+    }
+
     console.log('✓ CommonJS dynamic import test passed');
 })();

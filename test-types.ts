@@ -8,6 +8,11 @@ import {
     type CurrencyDecimalMap,
 } from './index.js';
 import { getExponentForCurrency as getExponentSubpath } from './currency-decimals.js';
+import { getCurrency as getCurrencyPkg } from 'locale-currency';
+import {
+    convertToSmallestCurrencyUnit as convertPkgSubpath,
+    currencyDecimalMap as decimalMapPkgSubpath,
+} from 'locale-currency/decimals';
 
 // Test getCurrency return types
 const currency1: string | null = getCurrency('US');
@@ -52,6 +57,14 @@ const minor: number = convertToSmallestCurrencyUnit(10.99, 'USD');
 const decimalMap: CurrencyDecimalMap = currencyDecimalMap;
 const usdDecimals: number = currencyDecimalMap.usd;
 const subpathExponent: number = getExponentSubpath('JPY');
+
+// Package exports resolve to the published type definitions
+const pkgCurrency: string | null = getCurrencyPkg('en-US');
+const pkgSubpathMinor: number = convertPkgSubpath(5, 'JPY');
+const pkgSubpathMap: CurrencyDecimalMap = decimalMapPkgSubpath;
+
+// @ts-expect-error - the decimals subpath does not export getCurrency
+import { getCurrency as notOnSubpath } from 'locale-currency/decimals';
 
 // @ts-expect-error - getExponentForCurrency should not accept numbers
 getExponentForCurrency(840);
