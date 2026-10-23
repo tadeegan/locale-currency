@@ -1,0 +1,125 @@
+name: Publish package
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: publish-package
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          # npm trusted publishing requires Node 22.14+ and npm 11.5.1+.
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Resolve package version
+        id: package
+        run: |
+          PACKAGE_NAME="$(node -p "require('./package.json').name")"
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          PACKAGE_TAG="v$PACKAGE_VERSION"
+
+          if [[ "$PACKAGE_VERSION" == *-* ]]; then
+            NPM_DIST_TAG="next"
+          else
+            NPM_DIST_TAG="latest"
+          fi
+
+          echo "name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "version=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$PACKAGE_TAG" >> "$GITHUB_OUTPUT"
+          echo "dist_tag=$NPM_DIST_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Check published state
+        id: state
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_NAME: ${{ steps.package.outputs.name }}
+          PACKAGE_VERSION: ${{ steps.package.outputs.version }}
+          PACKAGE_TAG: ${{ steps.package.outputs.tag }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$PACKAGE_TAG" >/dev/null 2>&1; then
+            TAG_EXISTS="true"
+          else
+            TAG_EXISTS="false"
+          fi
+
+          # Tags have been pushed without releases before, so check the release itself.
+          if gh release view "$PACKAGE_TAG" >/dev/null 2>&1; then
+            RELEASE_EXISTS="true"
+          else
+            RELEASE_EXISTS="false"
+          fi
+
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version >/dev/null 2>&1; then
+            NPM_EXISTS="true"
+          else
+            NPM_EXISTS="false"
+          fi
+
+          echo "tag_exists=$TAG_EXISTS" >> "$GITHUB_OUTPUT"
+          echo "release_exists=$RELEASE_EXISTS" >> "$GITHUB_OUTPUT"
+          echo "npm_exists=$NPM_EXISTS" >> "$GITHUB_OUTPUT"
+
+          echo "Tag $PACKAGE_TAG exists: $TAG_EXISTS"
+          echo "Release $PACKAGE_TAG exists: $RELEASE_EXISTS"
+          echo "Package $PACKAGE_NAME@$PACKAGE_VERSION exists on npm: $NPM_EXISTS"
+
+      - name: Skip existing npm version
+        if: steps.state.outputs.npm_exists == 'true'
+        env:
+          PACKAGE_NAME: ${{ steps.package.outputs.name }}
+          PACKAGE_VERSION: ${{ steps.package.outputs.version }}
+        run: echo "$PACKAGE_NAME@$PACKAGE_VERSION is already published on npm; skipping publish."
+
+      - name: Install dependencies
+        if: steps.state.outputs.npm_exists == 'false'
+        run: npm ci
+
+      - name: Run tests
+        if: steps.state.outputs.npm_exists == 'false'
+        run: npm test
+
+      - name: Create GitHub release
+        if: steps.state.outputs.release_exists == 'false' && (steps.state.outputs.npm_exists == 'false' || github.event_name == 'workflow_dispatch')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_TAG: ${{ steps.package.outputs.tag }}
+          TAG_EXISTS: ${{ steps.state.outputs.tag_exists }}
+        run: |
+          if [[ "$TAG_EXISTS" == "true" ]]; then
+            # Release the existing tag rather than moving it to this commit.
+            gh release create "$PACKAGE_TAG" \
+              --verify-tag \
+              --title "$PACKAGE_TAG" \
+              --generate-notes
+          else
+            gh release create "$PACKAGE_TAG" \
+              --target "$GITHUB_SHA" \
+              --title "$PACKAGE_TAG" \
+              --generate-notes
+          fi
+
+      - name: Publish to npm
+        if: steps.state.outputs.npm_exists == 'false'
+        run: npm publish --access public --tag "$NPM_DIST_TAG"
+        env:
+          NPM_DIST_TAG: ${{ steps.package.outputs.dist_tag }}
